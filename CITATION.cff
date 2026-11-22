@@ -1,0 +1,34 @@
+cff-version: 1.2.0
+message: "If you use SymbioOS or SymbioBench-Agent in your research, please cite the following work."
+title: "SymbioOS: Closed-Loop Rootless POSIX Sandbox Scheduling and White-Box Streaming KV Promotion for Tool-Intensive Agent Clusters"
+type: software
+authors:
+  - family-names: "Syed"
+    given-names: "Mohammed Kamran"
+    affiliation: "IEEE Independent Researcher"
+    orcid: "https://orcid.org/0009-0009-9058-5375"
+  - family-names: "Rentala"
+    given-names: "Anudeep"
+    affiliation: "IEEE Independent Researcher"
+  - family-names: "Rahul"
+    given-names: "Somesh"
+    affiliation: "IEEE Independent Researcher"
+  - family-names: "Pai"
+    given-names: "Raghuram Malpe"
+    affiliation: "IEEE Independent Researcher"
+  - family-names: "Dara"
+    given-names: "Krishna Suman"
+    affiliation: "IEEE Independent Researcher"
+version: 1.0.0
+date-released: "2026-11-22"
+license: Apache-2.0
+repository-code: "https://github.com/batistado/symbioos"
+url: "https://huggingface.co/spaces/batistado/SymbioOS-Explorer"
+keywords:
+  - llm-serving
+  - kv-cache
+  - os-scheduling
+  - coding-agents
+  - gittins-index
+  - tandem-queueing
+  - streaming-prefill

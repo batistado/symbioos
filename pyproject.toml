@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "symbioos"
+version = "1.0.0"
+description = "SymbioOS: Closed-Loop Rootless POSIX Sandbox Scheduling and White-Box Streaming KV Promotion for Tool-Intensive Agent Clusters"
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+authors = [
+  { name = "Mohammed Kamran Syed", email = "mohammedkamran.syed@ieee.org" },
+  { name = "Anudeep Rentala", email = "anudeep.rentala@ieee.org" },
+  { name = "Somesh Rahul", email = "someshrahul@ieee.org" },
+  { name = "Raghuram Malpe Pai", email = "raghuram.pai@ieee.org" },
+  { name = "Krishna Suman Dara", email = "krishna-suman.dara@ieee.org" },
+]
+keywords = [
+  "llm-serving",
+  "kv-cache",
+  "operating-systems",
+  "posix-scheduling",
+  "coding-agents",
+  "gittins-index",
+  "streaming-prefill",
+]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Topic :: System :: Operating Systems",
+]
+dependencies = [
+  "numpy>=1.24.0",
+  "torch>=2.2.0",
+  "transformers>=4.44.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0.0", "matplotlib>=3.7.0"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["symbioos*"]

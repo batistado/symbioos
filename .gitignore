@@ -1,0 +1,45 @@
+# Internal Handoff & Scratch Notes
+HANDOFF_CONTEXT.md
+pilot/.devtool_scratch/
+pilot/.build_scratch/
+
+# Python & Virtual Environments
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+
+# OS & Editor
+.DS_Store
+*.swp
+*~
+.vscode/
+.idea/
+
+# Raw KV Dumps & Weights
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.gguf
+*.npz
+raw_kv_dumps/
+hf_cache/
+
+# LaTeX Build Intermediates (keep .tex, .bib, .cls, .bst, .pdf, .zip)
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
