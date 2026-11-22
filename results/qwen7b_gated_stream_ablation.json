@@ -1,0 +1,53 @@
+[
+  {
+    "label": "SymbioOS-Sched (No Stream)",
+    "total_resumes": 64,
+    "ttft_mean_ms": 3004.24,
+    "ttft_p50_ms": 3078.91,
+    "ttft_p95_ms": 5053.82,
+    "ttft_p99_ms": 5486.68,
+    "cold_reload_mean_ms": 675.89,
+    "eof_prefill_mean_ms": 454.44,
+    "hbm_hit_rate_pct": 35.94,
+    "interactive_hit_rate_pct": 50.0,
+    "total_waste_mb_s_per_seed": 1142.79,
+    "episode_jct_mean_sec": 11.591,
+    "cluster_goodput_ep_per_min": 39.38,
+    "slo_goodput_le_600ms_per_min": 4.92,
+    "micro_chunks_prefilled": 0
+  },
+  {
+    "label": "SymbioOS-Full (Ungated 256)",
+    "total_resumes": 64,
+    "ttft_mean_ms": 2831.09,
+    "ttft_p50_ms": 3021.84,
+    "ttft_p95_ms": 5276.78,
+    "ttft_p99_ms": 5500.52,
+    "cold_reload_mean_ms": 559.71,
+    "eof_prefill_mean_ms": 444.4,
+    "hbm_hit_rate_pct": 34.38,
+    "interactive_hit_rate_pct": 50.0,
+    "total_waste_mb_s_per_seed": 1253.72,
+    "episode_jct_mean_sec": 11.62,
+    "cluster_goodput_ep_per_min": 39.8,
+    "slo_goodput_le_600ms_per_min": 6.22,
+    "micro_chunks_prefilled": 9
+  },
+  {
+    "label": "SymbioOS-Full-Gated (128tok, util<0.55)",
+    "total_resumes": 64,
+    "ttft_mean_ms": 2882.59,
+    "ttft_p50_ms": 3116.06,
+    "ttft_p95_ms": 4562.76,
+    "ttft_p99_ms": 5062.07,
+    "cold_reload_mean_ms": 633.82,
+    "eof_prefill_mean_ms": 452.1,
+    "hbm_hit_rate_pct": 34.38,
+    "interactive_hit_rate_pct": 50.0,
+    "total_waste_mb_s_per_seed": 1087.41,
+    "episode_jct_mean_sec": 11.464,
+    "cluster_goodput_ep_per_min": 40.03,
+    "slo_goodput_le_600ms_per_min": 5.0,
+    "micro_chunks_prefilled": 3
+  }
+]

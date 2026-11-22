@@ -113,6 +113,10 @@ def run_tandem_sim(
     pareto_alpha: float = 1.45,
     delta_jit_s: float = 0.35,
     dt: float = 0.05,
+    hbm_cap_mb_override: Optional[float] = None,
+    dma_bw_override: Optional[float] = None,
+    prefill_tok_s_override: Optional[float] = None,
+    kv_mb_per_tok_override: Optional[float] = None,
 ) -> Dict[str, Any]:
     """Time-stepped discrete-event simulation (dt = 50 ms) of a memory-coupled
     two-station tandem cluster.
@@ -123,10 +127,10 @@ def run_tandem_sim(
     # Scale multi-GPU throughput & DMA bandwidth proportionally to cluster size (64 agents per GPU node)
     node_scale = concurrency_n / 64.0
     mean_ep_mb = 620.0
-    hbm_cap_mb = concurrency_n * mean_ep_mb * hbm_ratio
-    dma_bw_mb_s = 3200.0 * node_scale        # 3.2 GB/s contended PCIe/NVMe per 64-agent node
-    prefill_tok_per_s = 36_000.0 * node_scale  # 36k tok/s prefill capacity per 64-agent node
-    kv_mb_per_tok = 0.160                    # 160 KB/tok (32B/70B GQA fp16)
+    hbm_cap_mb = hbm_cap_mb_override if hbm_cap_mb_override is not None else (concurrency_n * mean_ep_mb * hbm_ratio)
+    dma_bw_mb_s = dma_bw_override if dma_bw_override is not None else (3200.0 * node_scale)
+    prefill_tok_per_s = prefill_tok_s_override if prefill_tok_s_override is not None else (36_000.0 * node_scale)
+    kv_mb_per_tok = kv_mb_per_tok_override if kv_mb_per_tok_override is not None else 0.160
 
     next_ep_idx = 0
     active: List[SimAgent] = []

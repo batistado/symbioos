@@ -414,6 +414,7 @@ def run_devtool_policy(
     nvme_bw_mb_s: float,
     micro_chunk_tokens: int,
     device: str = "mps",
+    stream_util_gate: Optional[float] = None,
 ) -> Dict[str, Any]:
     hbm_cap_bytes = int(hbm_cap_mb * 1024 * 1024)
     worker_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "real_devtool_worker.py")
@@ -752,6 +753,8 @@ def run_devtool_policy(
     sched_thread = threading.Thread(target=os_pgroup_scheduler_loop, daemon=True)
     t_bench_start = time.perf_counter()
     sched_thread.start()
+    gpu_busy_ewma = 0.0
+    last_loop_ts = t_bench_start
 
     def run_tiering_tick(now: float) -> None:
         drain_dma(now)
@@ -891,6 +894,9 @@ def run_devtool_policy(
                     _ = forward_chunked_mps(model, next_open_ids, s.cache, max_step=256, device=device)
                 torch.mps.synchronize()
                 now_done = time.perf_counter()
+                gpu_dt = now_done - t_pf0
+                gpu_busy_ewma = 0.7 * gpu_busy_ewma + 0.3 * min(1.0, gpu_dt / max(now_done - last_loop_ts, 1e-3))
+                last_loop_ts = now_done
 
                 if s.cur_turn_idx + 1 < len(s.spec.turns):
                     new_b = cache_kv_bytes(s.cache)
@@ -912,7 +918,9 @@ def run_devtool_policy(
                 continue
 
             did_micro = False
-            if policy == "symbioos_full" and micro_chunk_tokens > 0:
+            hbm_util_now = current_hbm_bytes() / max(hbm_cap_bytes, 1)
+            gate_ok = (stream_util_gate is None) or (gpu_busy_ewma < stream_util_gate and hbm_util_now < 0.85)
+            if policy == "symbioos_full" and micro_chunk_tokens > 0 and gate_ok:
                 cands: List[Tuple[float, SessionRuntime, List[int]]] = []
                 with state_lock:
                     snap = [
