@@ -169,9 +169,10 @@ Next, consider an evicted sandbox ($r_i(t) = 0$) whose filtered remaining time $
 
 \begin{theorem}[Optimal-Stopping JIT Promotion and Tandem Stability]\label{thm:jit}
 (a) Under stochastic monotonicity of $R_i(t) \mid \mathcal{F}_t$ as $p_i(t) \uparrow 1$, the expected single-turn staging loss
-\begin{equation}\label{eq:jit_loss}
-\mathcal{L}_i(t) = c_{\mathrm{miss}}\,\E\bigl[(T_{\mathrm{dma},i} - R_i(t))_+ \mid \mathcal{F}_t\bigr] + \lambda_{\mathrm{hbm}} S_i\,\E\bigl[(R_i(t) - T_{\mathrm{dma},i})_+ \mid \mathcal{F}_t\bigr]
-\end{equation}
+\begin{multline}\label{eq:jit_loss}
+\mathcal{L}_i(t) = c_{\mathrm{miss}}\,\E\bigl[(T_{\mathrm{dma},i} - R_i(t))_+ \mid \mathcal{F}_t\bigr] \\
++ \lambda_{\mathrm{hbm}} S_i\,\E\bigl[(R_i(t) - T_{\mathrm{dma},i})_+ \mid \mathcal{F}_t\bigr]
+\end{multline}
 is minimized by initiating promotion at the first stopping time $\tau_{\mathrm{stage},i}^*$ satisfying the critical-fractile boundary
 \begin{equation}\label{eq:jit_thresh}
 \Prob\bigl(R_i(t) \le T_{\mathrm{dma},i} + \delta_{\mathrm{jit}} \;\big|\; \mathcal{F}_t\bigr) \ge \frac{c_{\mathrm{miss}}}{c_{\mathrm{miss}} + \lambda_{\mathrm{hbm}} S_i} =: 1 - \eta^*.
@@ -271,7 +272,8 @@ Before multi-tenant benchmarking, we verified Proposition~\ref{prop:bpe} on live
 \centering
 \caption{Phase 0 Controlled Heavy-Tailed Benchmark on \texttt{Qwen2.5-3B-Instruct} (\texttt{FP16} MPS, $C = 4$ CPU Sandbox Cores, $3$ Seeds, $1{,}080$ Total Resumes)}
 \label{tab:phase0}
-\setlength{\tabcolsep}{4.8pt}
+\footnotesize
+\setlength{\tabcolsep}{3.6pt}
 \begin{tabular}{llrrrrrrrrr}
 \toprule
 \textbf{Regime} & \textbf{Policy} & \textbf{TTFT P50} & \textbf{TTFT P95} & \textbf{TTFT P99} & \textbf{Cold Wait} & \textbf{HBM Hit} & \textbf{Inter.\ Hit} & \textbf{HBM Waste} & \textbf{Mean JCT} & \textbf{SLO Goodput} \\
@@ -312,7 +314,8 @@ Third, comparing \SymbioFull{} against \SymbioSched{} validates Theorem~\ref{thm
 \centering
 \caption{Phase 1 Real Developer-Tool Process Groups (\texttt{pytest 9.2}, \texttt{clang++ -O3}, \texttt{git}) Across Three LLM Architectures ($K{=}10$, $C{=}3$ Cores)}
 \label{tab:phase1}
-\setlength{\tabcolsep}{4.6pt}
+\footnotesize
+\setlength{\tabcolsep}{3.2pt}
 \begin{tabular}{llrrrrrrrrr}
 \toprule
 \textbf{Model Architecture} & \textbf{Policy} & \textbf{TTFT P50} & \textbf{TTFT P95} & \textbf{Cold Wait} & \textbf{EOF Prefill} & \textbf{HBM Hit} & \textbf{Inter.\ Hit} & \textbf{HBM Waste} & \textbf{Mean JCT} & \textbf{SLO Goodput} \\
@@ -363,10 +366,11 @@ Across every model family, \SymbioOS{} delivers large, consistent gains:
 \centering
 \caption{Per-Archetype Mechanism Dissection on \texttt{Qwen2.5-3B} (Real \texttt{pytest}, \texttt{clang++}, and \texttt{git} Process Groups)}
 \label{tab:archetype}
-\setlength{\tabcolsep}{3.4pt}
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
 \begin{tabular}{llrrr}
 \toprule
-\textbf{Tool Class} & \textbf{Policy} & \textbf{Tool Wall (s)} & \textbf{HBM Hit (\%)} & \textbf{Mean TTFT (ms)} \\
+\textbf{Tool Class} & \textbf{Policy} & \textbf{Wall (s)} & \textbf{Hit (\%)} & \textbf{TTFT (ms)} \\
 \midrule
 \multirow{3}{*}{\texttt{pytest\_suite}}
  & \texttt{LRU + CFS} & 2.14 & 50.0\% & 1048.5 \\
@@ -482,9 +486,10 @@ and under scale-family DHR laws (such as Pareto $W_{\mathrm{rem},i} \sim \mathrm
 
 \begin{IEEEproof}[Proof of Theorem~\ref{thm:jit}]
 For part~(a), expand the conditional expectation in \eqref{eq:jit_loss} with respect to $G_{i,t}(x) = \Prob(R_i(t) \le x \mid \mathcal{F}_t)$ evaluated around $T_d := T_{\mathrm{dma},i}$ (incorporating safety shift $\delta_{\mathrm{jit}} \ge 0$ via effective transfer window $\tilde{T}_d = T_d + \delta_{\mathrm{jit}}$):
-\begin{equation*}
-\mathcal{L}_i(t) = c_{\mathrm{miss}} \int_0^{\tilde{T}_d} (\tilde{T}_d - x)\,\mathrm{d}G_{i,t}(x) + \lambda_{\mathrm{hbm}} S_i \int_{\tilde{T}_d}^\infty (x - \tilde{T}_d)\,\mathrm{d}G_{i,t}(x).
-\end{equation*}
+\begin{multline*}
+\mathcal{L}_i(t) = c_{\mathrm{miss}} \int_0^{\tilde{T}_d} (\tilde{T}_d - x)\,\mathrm{d}G_{i,t}(x) \\
++ \lambda_{\mathrm{hbm}} S_i \int_{\tilde{T}_d}^\infty (x - \tilde{T}_d)\,\mathrm{d}G_{i,t}(x).
+\end{multline*}
 Integrating by parts and taking the first-order variation with respect to delaying staging by an infinitesimal $\mathrm{d}t > 0$ (which shifts the residual distribution downward by $\mathrm{d}t$ under unit progress rate) gives marginal expected saving from staging now versus waiting:
 \begin{equation*}
 -\frac{\partial \mathcal{L}_i(t)}{\partial \tilde{T}_d} = -c_{\mathrm{miss}}\,G_{i,t}(\tilde{T}_d) + \lambda_{\mathrm{hbm}} S_i\bigl(1 - G_{i,t}(\tilde{T}_d)\bigr).

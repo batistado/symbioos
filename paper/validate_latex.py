@@ -130,7 +130,7 @@ def validate_tex_and_bib(tex_path: Path, bib_path: Path) -> int:
         r"\\(?:label|ref|eqref|cite\w*|includegraphics(?:\[[^\]]*\])?|url|bibliography|bibliographystyle|graphicspath|input)\{[^}]*\}"
     )
     for lno, line in clean_lines:
-        if re.search(r"\\begin\{(?:equation\*?|align\*?)\}", line):
+        if re.search(r"\\begin\{(?:equation\*?|align\*?|multline\*?)\}", line):
             in_disp_math = True
         if not in_disp_math and not re.match(r"^\s*\\(?:newcommand|renewcommand|providecommand|def)\b", line):
             tmp = line.replace("``", "")
@@ -157,7 +157,7 @@ def validate_tex_and_bib(tex_path: Path, bib_path: Path) -> int:
                     errors.append(f"Humanizer check: banned stock AI word '{bw}' at line {lno}")
             if re.search(r"\bnot\s+(?:just|merely|only)\b", low):
                 errors.append(f"Humanizer check: 'not just/merely/only' formula at line {lno}")
-        if re.search(r"\\end\{(?:equation\*?|align\*?)\}", line):
+        if re.search(r"\\end\{(?:equation\*?|align\*?|multline\*?)\}", line):
             in_disp_math = False
 
     # 5. Strict IEEE TPDS Abstract Gate
