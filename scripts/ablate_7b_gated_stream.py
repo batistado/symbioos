@@ -53,7 +53,7 @@ def main() -> None:
         out_rows.append(s)
         print(f"{lbl:40s} | P50={s['ttft_p50_ms']:7.1f}ms P95={s['ttft_p95_ms']:7.1f}ms | Hit={s['hbm_hit_rate_pct']:5.1f}% | JCT={s['episode_jct_mean_sec']:5.2f}s | Chunks={s['micro_chunks_prefilled']}")
 
-    out_path = Path("/Users/mksyed/Documents/research/symbioos/results/qwen7b_gated_stream_ablation.json")
+    out_path = Path(__file__).resolve().parent.parent / "results" / "qwen7b_gated_stream_ablation.json"
     out_path.write_text(json.dumps(out_rows, indent=2))
     print(f"Saved -> {out_path}")
 

@@ -191,8 +191,8 @@ def validate_tex_and_bib(tex_path: Path, bib_path: Path) -> int:
     if "Competing Interests" not in clean_tex and "Acknowledgments" not in clean_tex:
         errors.append("Missing Acknowledgments / Competing Interests disclosure")
     bio_count = len(re.findall(r"\\begin\{IEEEbiographynophoto\}", clean_tex))
-    if bio_count != 5:
-        errors.append(f"Expected 5 IEEEbiographynophoto entries, found {bio_count}")
+    if bio_count != 0:
+        errors.append(f"Expected 0 IEEEbiographynophoto entries, found {bio_count}")
 
     # 7. Citations vs BibTeX keys
     bib_keys: Set[str] = set(re.findall(r"@\w+\{\s*([^,\s]+)\s*,", bib))

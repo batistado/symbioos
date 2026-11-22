@@ -23,7 +23,7 @@ def pearson_r(x: list[float], y: list[float]) -> float:
 
 
 def main() -> None:
-    p0 = json.loads(Path("/Users/mksyed/Documents/research/symbioos/results/symbioos_pilot.json").read_text())
+    p0 = json.loads((Path(__file__).resolve().parent.parent / "results" / "symbioos_pilot.json").read_text())
     hw_map = {s["policy"]: s for s in p0["summary"]}
     policies = ["lru_cfs", "continuum_cfs", "unison_cfs", "symbioos_sched", "symbioos_full"]
 

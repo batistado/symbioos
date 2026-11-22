@@ -27,9 +27,9 @@ python3 validate_latex.py
 
 ### Format & Desk-Rejection Compliance
 * **Document Class:** `\documentclass[10pt,journal,compsoc]{IEEEtran}` (`IEEEtran.cls` v1.8b).
-* **Page Estimate:** **~10 pages** (comfortably within IEEE TPDS's 12-page regular-paper free limit, inclusive of references, Appendix A formal proofs, disclosures, and author biographies).
+* **Page Estimate:** **11 pages** (comfortably within IEEE TPDS's 12-page regular-paper free limit, inclusive of references, Appendix A formal proofs, and disclosures).
 * **Abstract:** Single paragraph, **193 words** (`<= 200` words strictly), zero inline math, zero citations, zero footnotes.
-* **Mandatory Disclosures:** Author ORCID (`0009-0009-9058-5375`), `IEEEkeywords`, Data and Code Availability, Acknowledgments and Competing Interests, and 5 `IEEEbiographynophoto` biographies.
+* **Mandatory Disclosures:** Author ORCID (`0009-0009-9058-5375`), `IEEEkeywords`, Data and Code Availability, and Acknowledgments and Competing Interests.
 * **PDF eXpress Figure Compliance:** All 5 vector PDFs embed Type-42 TrueType fonts (`pdf.fonttype = 42`, `ps.fonttype = 42`) using the colorblind-safe Okabe-Ito palette.
 
 ### Author Roster

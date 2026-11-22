@@ -204,6 +204,7 @@ Closed-loop tiering executes three coordinated rules on every control tick:
 \item \emph{Point-Estimate JIT Promotion:} Approximating \eqref{eq:jit_thresh} in deterministic form, when an evicted non-stalled sandbox reaches $p_i(t) \ge 0.60$ and $\hat{R}_i(t) \le T_{\mathrm{dma},i} + \delta_{\mathrm{jit}}$, \SymbioOS{} enqueues a speculative JIT load provided free plus demotable HBM bytes cover $S_i$. Upon DMA completion, if the tool is still running, \SymbioOS{} materializes $KV_i$ onto the GPU only if any displaced victim $j$ carries strictly smaller index $\tilde{w}_j(t) < \tilde{w}_i(t)$, preventing speculative thrashing.
 \item \emph{Work-Conserving Non-Blocking GPU Dispatch:} Exited sandboxes whose KV caches missed HBM enqueue cold reloads immediately at $t_{\mathrm{exit},i}$ without stalling the GPU; meanwhile, the GPU engine serves ready HBM-resident waiting sessions in FIFO order of $t_{\mathrm{exit}}$.
 \end{enumerate}
+All operational constants in Sections~4.1 and~4.2 ($\gamma_{\mathrm{res}} \in \{2.6, 0.12\}$, $\psi_i = 1.15$, $\beta_{\mathrm{age}} = 0.35$, $\tau_{\mathrm{stall}} = 1.25~\mathrm{s}$, the $2.6~\mathrm{s}$ build-demotion threshold at $65\%$ HBM utilization, and $p_i \ge 0.60$) were fixed once from Phase~0 \texttt{Qwen2.5-3B} profiling and held invariant across all Phase~1 models and Phase~2 simulations without per-model retuning.
 
 \subsection{Lookback-Guarded Streaming \texttt{stdout} Micro-Prefill}
 Two practical systems subtleties arise when overlapping \texttt{stdout} prefill with live tool execution. First, wrapping child CLI tools such as \texttt{pytest} inside standard Python file iterators (\texttt{for line in proc.stdout}) triggers an internal $8~\mathrm{KB}$ \texttt{TextIOWrapper} read-ahead block buffer that withholds output until process exit; \SymbioOS{} attaches child tool descriptors directly to unbuffered OS pipes (\texttt{PYTHONUNBUFFERED=1}), capturing $15$--$20$ live output bursts per test suite.
@@ -357,9 +358,9 @@ Table~\ref{tab:phase1} and Fig.~\ref{fig:multimodel} report real process-group s
 
 Across every model family, \SymbioOS{} delivers large, consistent gains:
 \begin{itemize}
-\item On \texttt{Qwen2.5-3B} ($36~\mathrm{KB/tok}$), \SymbioFull{} cuts median TTFT from $1{,}099.4$--$1{,}265.7~\mathrm{ms}$ down to $262.6~\mathrm{ms}$ ($4.19\times$--$4.82\times$ speedup), raises interactive \texttt{pytest}/\texttt{lint} HBM hit rate from $59.5\%$--$73.8\%$ to $95.2\%$, reduces HBM waste by $3.16\times$ versus \texttt{LRU+CFS}, and boosts $\le 600~\mathrm{ms}$ SLO goodput by $3.46\times$--$4.07\times$ ($90.4$ vs.\ $22.2$--$26.1~\mathrm{resumes/min}$).
-\item On compute-heavy \texttt{Qwen2.5-7B} ($56~\mathrm{KB/tok}$), where single-GPU dense prefill utilizes $\approx 72\%$ of MPS capacity, \SymbioSched{} lowers median TTFT by $2.22\times$--$2.47\times$ ($3{,}918$--$4{,}355~\mathrm{ms} \to 1{,}765.1~\mathrm{ms}$; per-seed P50s $[1{,}596.9, 2{,}184.9]~\mathrm{ms}$) and lifts interactive HBM hit rate from $33.3\%$--$42.9\%$ to $81.0\%$. Notably, \emph{ungated} \SymbioFull{} regresses on \texttt{7B} relative to \SymbioSched{} ($2{,}210.5$ vs.\ $1{,}765.1~\mathrm{ms}$ P50, $+25.2\%$; $50.0\%$ vs.\ $54.7\%$ HBM hit rate), even though it still achieves the fastest JCT ($12.67~\mathrm{s}$) and highest goodput ($38.55~\mathrm{ep/min}$). As predicted by Theorem~\ref{thm:jit}(b), when $\mu_{\mathrm{pf}}$ is saturated on \texttt{7B}, a non-preemptive $256$-token streaming chunk holds the GPU for $\approx 160~\mathrm{ms}$ ($\bar{\xi}_{\mathrm{res}}$ blocking newly exited turns) while reserving $14.3~\mathrm{MB}$ of HBM early and triggering extra evictions. To validate this diagnosis, we tested a utilization-gated variant (\texttt{gpu\_busy\_ewma} $< 0.55$, HBM $< 85\%$, $B_{\mathrm{chunk}} = 128$) on \texttt{Qwen2.5-7B} across seeds $[42, 137]$: gating reduced P95 TTFT from $5{,}276.8~\mathrm{ms}$ (ungated) and $5{,}053.8~\mathrm{ms}$ (\SymbioSched{}) down to $4{,}562.8~\mathrm{ms}$ ($-13.5\%$) with fastest mean JCT ($11.46~\mathrm{s}$).
-\item On sparse MoE \texttt{OLMoE-1B-7B} ($128~\mathrm{KB/tok}$), fast $1\mathrm{B}$-active expert compute paired with $3.56\times$ larger MHA KV caches creates ideal conditions for both closed-loop tiering and idle-slack streaming: \SymbioFull{} slashes median TTFT by $3.48\times$--$3.82\times$ ($2{,}021.5$--$2{,}216.3~\mathrm{ms} \to 580.9~\mathrm{ms}$), raises interactive hit rate to $88.1\%$ ($90.5\%$ in \SymbioSched{}), cuts HBM waste from $7{,}671.7$ to $2{,}827.3~\mathrm{MB}\cdot\mathrm{s}$, lifts raw cluster goodput by $+21.6\%$ ($55.88$ vs.\ $45.95~\mathrm{ep/min}$), and increases strict-SLO goodput by $4.8\times$--$5.7\times$ ($57.6$ vs.\ $10.1$--$11.9~\mathrm{resumes/min}$).
+\item On \texttt{Qwen2.5-3B} ($36~\mathrm{KB/tok}$), \SymbioFull{} cuts median TTFT from $1{,}099.4$--$1{,}265.7~\mathrm{ms}$ down to $262.6~\mathrm{ms}$ ($4.19\times$--$4.82\times$ speedup; per-seed P50s $[271.2, 248.7]~\mathrm{ms}$ vs.\ $[1{,}209.6, 1{,}211.5]~\mathrm{ms}$ for \texttt{LRU+CFS}), raises interactive \texttt{pytest}/\texttt{lint} HBM hit rate from $59.5\%$--$73.8\%$ to $95.2\%$, reduces HBM waste by $3.16\times$ versus \texttt{LRU+CFS}, and boosts $\le 600~\mathrm{ms}$ SLO goodput by $3.46\times$--$4.07\times$ ($90.4$ vs.\ $22.2$--$26.1~\mathrm{resumes/min}$).
+\item On compute-heavy \texttt{Qwen2.5-7B} ($56~\mathrm{KB/tok}$), where single-GPU dense prefill utilizes $\approx 72\%$ of MPS capacity, \SymbioSched{} lowers median TTFT by $2.22\times$--$2.47\times$ ($3{,}918$--$4{,}355~\mathrm{ms} \to 1{,}765.1~\mathrm{ms}$; per-seed P50s $[1{,}596.9, 2{,}184.9]~\mathrm{ms}$) and lifts interactive HBM hit rate from $33.3\%$--$42.9\%$ to $81.0\%$. Notably, \emph{ungated} \SymbioFull{} regresses on \texttt{7B} relative to \SymbioSched{} ($2{,}210.5$ vs.\ $1{,}765.1~\mathrm{ms}$ P50, $+25.2\%$; $50.0\%$ vs.\ $54.7\%$ HBM hit rate), even though it still achieves the fastest JCT ($12.67~\mathrm{s}$) and highest goodput ($38.55~\mathrm{ep/min}$). As predicted by Theorem~\ref{thm:jit}(b), when $\mu_{\mathrm{pf}}$ is saturated on \texttt{7B}, a non-preemptive $256$-token streaming chunk holds the GPU for $\approx 160~\mathrm{ms}$ ($\bar{\xi}_{\mathrm{res}}$ blocking newly exited turns) while reserving $14.3~\mathrm{MB}$ of HBM early and triggering extra evictions. To validate this diagnosis under controlled paired execution, we re-ran \SymbioSched{}, ungated \SymbioFull{}, and a utilization-gated variant (\texttt{gpu\_busy\_ewma} $< 0.55$, HBM $< 85\%$, $B_{\mathrm{chunk}} = 128$) back-to-back in a standalone \texttt{Qwen2.5-7B} session across seeds $[42, 137]$; because that standalone run experienced higher ambient workstation thermal load than the Table~\ref{tab:phase1} sweep, absolute P95 latencies shifted upward uniformly across all three configurations, yet gating reduced paired P95 TTFT from $5{,}276.8~\mathrm{ms}$ (ungated) and $5{,}053.8~\mathrm{ms}$ (\SymbioSched{}) down to $4{,}562.8~\mathrm{ms}$ ($-13.5\%$) with the fastest mean JCT ($11.46~\mathrm{s}$).
+\item On sparse MoE \texttt{OLMoE-1B-7B} ($128~\mathrm{KB/tok}$), fast $1\mathrm{B}$-active expert compute paired with $3.56\times$ larger MHA KV caches creates ideal conditions for both closed-loop tiering and idle-slack streaming: \SymbioFull{} slashes median TTFT by $3.48\times$--$3.82\times$ ($2{,}021.5$--$2{,}216.3~\mathrm{ms} \to 580.9~\mathrm{ms}$; per-seed P50s $[462.9, 766.7]~\mathrm{ms}$ vs.\ $[2{,}399.7, 2{,}169.2]~\mathrm{ms}$ for \texttt{LRU+CFS}), raises interactive hit rate to $88.1\%$ ($90.5\%$ in \SymbioSched{}), cuts HBM waste from $7{,}671.7$ to $2{,}827.3~\mathrm{MB}\cdot\mathrm{s}$, lifts raw cluster goodput by $+21.6\%$ ($55.88$ vs.\ $45.95~\mathrm{ep/min}$), and increases strict-SLO goodput by $4.8\times$--$5.7\times$ ($57.6$ vs.\ $10.1$--$11.9~\mathrm{resumes/min}$).
 \end{itemize}
 
 \begin{table}[!t]
@@ -499,26 +500,5 @@ For part~(b), let $Q_1(k)$ denote the number of post-exit sessions queued at Sta
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
-\newpage
-
-\begin{IEEEbiographynophoto}{Mohammed Kamran Syed}
-received the M.S. degree in computer science. He is an IEEE Independent Researcher focusing on distributed inference systems, operating-system and GPU co-scheduling, KV-cache management, and fault-tolerant multi-agent orchestration.
-\end{IEEEbiographynophoto}
-
-\begin{IEEEbiographynophoto}{Anudeep Rentala}
-is an IEEE Independent Researcher focusing on distributed systems, storage-compute disaggregation, and scalable inference runtimes for large language models.
-\end{IEEEbiographynophoto}
-
-\begin{IEEEbiographynophoto}{Somesh Rahul}
-is an IEEE Independent Researcher working on runtime telemetry, cache consistency verification, and performance engineering for heterogeneous GPU clusters.
-\end{IEEEbiographynophoto}
-
-\begin{IEEEbiographynophoto}{Raghuram Malpe Pai}
-is an IEEE Independent Researcher working on systems reliability, concurrency control, and deterministic workflow orchestration.
-\end{IEEEbiographynophoto}
-
-\begin{IEEEbiographynophoto}{Krishna Suman Dara}
-is an IEEE Independent Researcher focusing on parallel architectures, distributed state synchronization, and machine learning systems infrastructure.
-\end{IEEEbiographynophoto}
 
 \end{document}
